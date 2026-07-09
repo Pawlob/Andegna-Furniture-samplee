@@ -1,0 +1,247 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'PP Neue Montreal';
+  src: url('https://cdn.prod.website-files.com/6819ed8312518f61b84824df/6819ed8312518f61b84825ba_PPNeueMontreal-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+body {
+  background-color: #ffffff;
+  font-family: 'PP Neue Montreal', Arial, sans-serif;
+  color: #201d1d;
+  margin: 0;
+  padding: 0;
+  overscroll-behavior: none;
+}
+
+@font-face {
+  font-family: 'nokia-bold';
+  src: url('/font/NokiaPureHeadline.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'nokia-light';
+  src: url('/font/Nokia-light.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Bela-Hidase-Bold';
+  src: url('/font/Bela-Hidase-Bold.woff2') format('woff2');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bela-Hidase-Light';
+  src: url('/font/Bela-Hidase-Light.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'JegenaTitle-zamaric';
+  src: url('/font/JegenaTitle-zamaric.woff2') format('woff2');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+.font-amharic-bold {
+  font-family: 'Bela-Hidase-Bold', 'JegenaTitle-zamaric', 'nokia-bold', sans-serif;
+}
+
+.font-amharic-light {
+  font-family: 'Bela-Hidase-Light', 'nokia-light', sans-serif;
+}
+
+/* Preloader Styles */
+.willem-header {
+  color: #201d1d;
+  position: relative;
+  overflow: hidden;
+  height: 100vh;
+  width: 100%;
+}
+
+.willem-loader {
+  color: #201d1d;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  position: absolute;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  background-color: #ffffff;
+  z-index: 100;
+}
+
+.willem__h1 {
+  white-space: nowrap;
+  justify-content: center;
+  font-size: clamp(3rem, 15vw, 12.5rem);
+  font-weight: 500;
+  line-height: 1.15;
+  display: flex;
+  position: relative;
+}
+
+.willem__h1-start {
+  justify-content: flex-end;
+  width: max-content;
+  display: flex;
+  overflow: hidden;
+}
+
+.willem__h1-end {
+  justify-content: flex-start;
+  width: max-content;
+  display: flex;
+  overflow: hidden;
+}
+
+.willem__letter {
+  display: block;
+  position: relative;
+}
+
+.willem-loader__box {
+  flex-flow: column;
+  justify-content: center;
+  align-items: center;
+  width: 0;
+  display: flex;
+  position: relative;
+}
+
+.willem-loader__box-inner {
+  justify-content: center;
+  align-items: center;
+  min-width: 1em;
+  height: 95%;
+  display: flex;
+  position: relative;
+}
+
+.willem__growing-image {
+  justify-content: center;
+  align-items: center;
+  width: 0%;
+  height: 100%;
+  display: flex;
+  position: absolute;
+  overflow: hidden;
+}
+
+.willem__growing-image-wrap {
+  width: 100%;
+  min-width: 1em;
+  height: 100%;
+  position: absolute;
+}
+
+.willem__cover-image {
+  pointer-events: none;
+  object-fit: cover;
+  user-select: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.willem__cover-image-extra {
+  pointer-events: none;
+  object-fit: cover;
+  user-select: none;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.willem__cover-image-extra.is--1 { z-index: 3; }
+.willem__cover-image-extra.is--2 { z-index: 2; }
+.willem__cover-image-extra.is--3 { z-index: 1; }
+
+.willem-header__content {
+  flex-flow: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 100dvh;
+  padding: 3rem;
+  display: flex;
+  position: relative;
+  z-index: 50;
+  opacity: 0; /* Animated in via GSAP */
+}
+
+.willem-header__top, .willem-header__bottom {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+.willem__letter-white {
+  display: block;
+  position: relative;
+}
+
+.willem__letter-white.is--space {
+  margin-left: .25em;
+}
+
+.willen-nav {
+  display: flex;
+  position: relative;
+  overflow: hidden;
+}
+
+.willem-nav__start {
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 50%;
+  display: flex;
+}
+
+.willem-nav__link {
+  color: inherit;
+  font-size: 1.3125em;
+  line-height: 1.3;
+  text-decoration: none;
+  position: relative;
+  display: block;
+}
+
+.osmo-credits__p {
+  pointer-events: auto;
+  text-align: center;
+  margin: 0;
+  font-size: 1.125em;
+  font-weight: 500;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.6);
+  display: block;
+  position: relative;
+}
+
+.osmo-credits__p-a {
+  color: #f4f4f4;
+}
+
+@media screen and (max-width: 991px) {
+  .osmo-credits__p {
+    display: none;
+  }
+}

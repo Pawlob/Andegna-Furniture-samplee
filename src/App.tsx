@@ -89,6 +89,7 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [progress, setProgress] = useState(0);
   const [isReady, setIsReady] = useState(false);
+  const [useVideoFallback, setUseVideoFallback] = useState(false);
   const [animationComplete, setAnimationComplete] = useState(false);
   const framesRef = useRef<ImageBitmap[]>([]);
   const src = "/andegna-hero1.mp4";
@@ -207,7 +208,38 @@ export default function App() {
     let isCancelled = false;
 
     const initPreRender = async () => {
+      // 3.5 Seconds safety timeout: if extraction hangs or takes too long (e.g. low power mode, slow decoding), fail gracefully to direct video mode
+      const timeoutId = setTimeout(() => {
+        if (!isReady && !isCancelled) {
+          console.warn("Pre-render extraction timed out. Switching to highly compatible video fallback mode.");
+          setUseVideoFallback(true);
+          setProgress(100);
+          setIsReady(true);
+          if (videoRef.current) {
+            videoRef.current.currentTime = 0;
+          }
+          window.scrollTo(0, 0);
+        }
+      }, 3500);
+
       try {
+        // Detect mobile browsers / touch capability / small viewports to immediately use fallback
+        // This avoids out-of-memory browser crashes on mobile caused by storing many heavy canvas ImageBitmaps in RAM
+        const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || 
+                               (navigator.maxTouchPoints > 0) || 
+                               (window.innerWidth < 1024);
+
+        if (isMobileDevice || !window.createImageBitmap) {
+          clearTimeout(timeoutId);
+          console.log("Mobile or low-memory device detected. Direct video-scrubbing mode enabled.");
+          setUseVideoFallback(true);
+          setProgress(100);
+          setIsReady(true);
+          video.currentTime = 0;
+          window.scrollTo(0, 0);
+          return;
+        }
+
         if (video.readyState < 2) {
           await new Promise((resolve, reject) => {
             const handleLoaded = () => {
@@ -289,12 +321,17 @@ export default function App() {
           ctx.drawImage(startingFrame, 0, 0);
         }
 
+        clearTimeout(timeoutId);
         window.scrollTo(0, 0); 
         setIsReady(true);
       } catch (error) {
-        // Handle gracefully: skip extraction but allow progress to complete so loader is dismissed
+        clearTimeout(timeoutId);
+        console.error("Video pre-rendering failed. Falling back to direct video-scrubbing mode.", error);
+        setUseVideoFallback(true);
         setProgress(100);
         setIsReady(true);
+        video.currentTime = 0;
+        window.scrollTo(0, 0);
       }
     };
 
@@ -321,22 +358,28 @@ export default function App() {
       scrub: true,
       onUpdate: (self) => {
         const progress = self.progress;
-        const fraction = progress;
         
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext('2d', { willReadFrequently: true });
-        if (!canvas || !ctx) return;
+        if (useVideoFallback) {
+          const video = videoRef.current;
+          if (video && isFinite(video.duration) && video.duration > 0) {
+            video.currentTime = progress * video.duration;
+          }
+        } else {
+          const canvas = canvasRef.current;
+          const ctx = canvas?.getContext('2d', { willReadFrequently: true });
+          if (!canvas || !ctx) return;
 
-        const totalFrames = framesRef.current.length;
-        if (totalFrames > 0) {
-          let frameIndex = Math.floor(fraction * totalFrames);
-          if (frameIndex >= totalFrames) frameIndex = totalFrames - 1;
-          if (frameIndex < 0) frameIndex = 0;
+          const totalFrames = framesRef.current.length;
+          if (totalFrames > 0) {
+            let frameIndex = Math.floor(progress * totalFrames);
+            if (frameIndex >= totalFrames) frameIndex = totalFrames - 1;
+            if (frameIndex < 0) frameIndex = 0;
 
-          const bitmap = framesRef.current[frameIndex];
-          if (bitmap && canvas.width > 0 && canvas.height > 0) {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(bitmap, 0, 0);
+            const bitmap = framesRef.current[frameIndex];
+            if (bitmap && canvas.width > 0 && canvas.height > 0) {
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              ctx.drawImage(bitmap, 0, 0);
+            }
           }
         }
       }
@@ -345,7 +388,7 @@ export default function App() {
     return () => {
       trigger.kill();
     };
-  }, [isReady, animationComplete]);
+  }, [isReady, animationComplete, useVideoFallback]);
 
   // GSAP Preloader Animation
   useGSAP(() => {
@@ -463,19 +506,33 @@ export default function App() {
         
         {/* Canvas / Frame Render Layer */}
         <div className={`absolute inset-0 w-full h-full z-0 flex justify-center bg-zinc-950 transition-opacity duration-1000 ${animationComplete ? 'opacity-100' : 'opacity-0'}`}>
-          <video
-            ref={videoRef}
-            className="absolute w-0 h-0 opacity-0 pointer-events-none"
-            muted
-            playsInline
-            preload="auto"
-            crossOrigin="anonymous"
-            src={src}
-          />
-          <canvas
-            ref={canvasRef}
-            className="w-full h-full object-cover"
-          />
+          {useVideoFallback ? (
+            <video
+              ref={videoRef}
+              className="absolute inset-0 w-full h-full object-cover z-0"
+              muted
+              playsInline
+              preload="auto"
+              crossOrigin="anonymous"
+              src={src}
+            />
+          ) : (
+            <>
+              <video
+                ref={videoRef}
+                className="absolute w-0 h-0 opacity-0 pointer-events-none"
+                muted
+                playsInline
+                preload="auto"
+                crossOrigin="anonymous"
+                src={src}
+              />
+              <canvas
+                ref={canvasRef}
+                className="w-full h-full object-cover"
+              />
+            </>
+          )}
         </div>
 
         {/* Loader panel (blocks interaction during loading/intro animation) */}
